@@ -7,8 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -16,7 +19,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,6 +29,14 @@ import com.example.loginscreen.R
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    val emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[a-z]{2,}$".toRegex()
+    val isEmailValid = email.matches(emailRegex)
+    val isPasswordValid = password.isNotEmpty()
+    val isFormValid = isEmailValid && isPasswordValid
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -40,34 +51,59 @@ fun LoginScreen(navController: NavHostController) {
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.height(20.dp))
+
             Image(
-                painter = painterResource(id = R.drawable.userinterface),
-                contentDescription = "Ilustración de bienvenida",
-                modifier = Modifier.size(280.dp).padding(top = 20.dp)
+                painter = painterResource(id = R.drawable.ic_launcher_foreground), // Asegúrate que el recurso exista
+                contentDescription = "Logo",
+                modifier = Modifier.size(100.dp)
+            )
+
+            Text(
+                text = "Welcome Back",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF4A47A3)
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email Address") },
+                modifier = Modifier.fillMaxWidth(),
+                isError = email.isNotEmpty() && !isEmailValid
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth(),
+                isError = password.isEmpty() && email.isNotEmpty()
             )
 
             Spacer(modifier = Modifier.height(30.dp))
-            Text(text = "Hello", style = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold, color = Color.Black))
 
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "Welcome To Little Drop, where\nyou manage you daily tasks",
-                style = TextStyle(fontSize = 16.sp, color = Color.Gray, textAlign = TextAlign.Center),
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
-
-            Spacer(modifier = Modifier.height(60.dp))
-
-            Box(
+            Button(
+                onClick = {
+                    navController.navigate("main_screen")
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 40.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFF4A47A3)),
-                contentAlignment = Alignment.Center
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4A47A3),
+                    disabledContainerColor = Color.LightGray
+                ),
+                shape = RoundedCornerShape(25.dp),
+                enabled = isFormValid
             ) {
-                Text(text = "Login", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(text = "LOGIN", color = Color.White, fontSize = 16.sp)
             }
 
             Spacer(modifier = Modifier.height(20.dp))
@@ -75,27 +111,21 @@ fun LoginScreen(navController: NavHostController) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(60.dp)
-                    .padding(horizontal = 40.dp)
+                    .height(50.dp)
                     .clip(CircleShape)
                     .border(2.dp, Color(0xFF4A47A3), CircleShape)
                     .background(Color.White)
                     .clickable {
-                        navController.navigate("register_screen") // Salto al registro
+                        navController.navigate("register_screen")
                     },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "Sign Up", color = Color(0xFF4A47A3), fontWeight = FontWeight.Bold, fontSize = 18.sp)
-            }
-
-            Spacer(modifier = Modifier.height(40.dp))
-            Text(text = "Sign up using", style = TextStyle(fontSize = 14.sp, color = Color.Gray))
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(horizontalArrangement = Arrangement.spacedBy(15.dp), verticalAlignment = Alignment.CenterVertically) {
-                SocialIcon(text = "f", color = Color(0xFF3B5998))
-                SocialIcon(text = "G", color = Color(0xFFEA4335))
-                SocialIcon(text = "in", color = Color(0xFF0077B5))
+                Text(
+                    text = "Sign Up",
+                    color = Color(0xFF4A47A3),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
             }
         }
     }
@@ -106,14 +136,4 @@ fun LoginScreen(navController: NavHostController) {
 fun LoginScreenPreview() {
     val navController = rememberNavController()
     LoginScreen(navController)
-}
-
-@Composable
-fun SocialIcon(text: String, color: Color) {
-    Box(
-        modifier = Modifier.size(45.dp).clip(CircleShape).background(color),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = text, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-    }
 }
